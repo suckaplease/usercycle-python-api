@@ -34,9 +34,15 @@ class UsercycleError(Exception):
     """
     def __init__(self, data):
         errors = {
-            400:Invalid
+            400:Invalid,
+            401:Unauthorized,
+            403:Forbidden,
+            404:ResourceNotFount,
+            405:MethodNotAllowed,
+            406:NotAcceptable,
+            500:ServerError,
         }
-
+        raise errors.get(data.code, UnknownError)(data)
 
 class ResourceInvalid(Exception): pass
 class Unauthorized(Exception): pass
@@ -56,7 +62,8 @@ class UsercycleAPI(object):
         else:
             self.access_token = USERCYCLE_ACCESS_TOKEN
     
-    def signup(identity,
+    def signup(self,
+               identity,
                first_name=None,
                last_name=None,
                title=None,
@@ -70,6 +77,9 @@ class UsercycleAPI(object):
                campaign_source=None,
                search_terms=None,
                **kwargs):
+        kwargs['action'] = "SIGNED_UP"
+        kwargs['identity'] = identity
+        
         if first_name: kwargs['first-name'] = first_name
         if last_name: kwargs['last-name'] = last_name
         if title: kwargs['title'] = title
@@ -82,11 +92,33 @@ class UsercycleAPI(object):
         if referrer: kwargs['referrer'] = referrer
         if campaign_source: kwargs['campaign_source'] = campaign_source
         if search_terms: kwargs['search_terms'] = search_terms
-        
-        kwargs['identity'] = identity
-        
+                
         self.request("/events.json",post_args=kwargs)
     
+    def activated(self, identity, **kwargs):
+        kwargs['action'] = 'ACTIVATED'    
+        self.request("/events.json",post_args=kwargs)
+    
+    def came_back(self, identity, **kwargs):
+        kwargs['action'] = 'CAME_BACK'
+        kwargs['identity'] = identity
+        
+        self.request("/events.json", post_args=kwargs)
+    
+    def purchased(self, identity, revenue_amount=None, **kwargs):
+        kwargs['action'] = 'PURCHASED'
+        kwargs['identity'] = identity
+        
+        if revenue_amount: kwargs['revenue_amount'] = revenue_amount
+        
+        self.request("/events.json", post_args=kwargs)
+    
+    def canceled(self, identity, reason=None, **kwargs):
+        kwargs['action'] = 'CANCELED'
+        kwargs['identity'] = identity
+        if reason: kwargs['reason'] = reason
+
+
     def request(self, path, args=None, post_args=None):
         if not args: args = {}
         if self.access_token:
