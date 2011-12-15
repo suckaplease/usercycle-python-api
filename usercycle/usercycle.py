@@ -16,8 +16,9 @@ except ImportError:
         from django.utils import simplejson
         _parse_json = lambda s: simplejson.loads(s)
 
-version = "1"
+version = "8"
 protocol = "http"
+api_host = "api.usercycle.com"
 
 USERCYCLE_ACCESS_TOKEN = "REPLACE_WITH_YOUR_TOKEN"
 
@@ -80,8 +81,8 @@ class UsercycleAPI(object):
         kwargs['action'] = "SIGNED_UP"
         kwargs['identity'] = identity
         
-        if first_name: kwargs['first-name'] = first_name
-        if last_name: kwargs['last-name'] = last_name
+        if first_name: kwargs['firstname'] = first_name
+        if last_name: kwargs['lastname'] = last_name
         if title: kwargs['title'] = title
         if company: kwargs['company'] = company
         if email: kwargs['email'] = email
@@ -121,15 +122,22 @@ class UsercycleAPI(object):
 
     def request(self, path, args=None, post_args=None):
         if not args: args = {}
-        if self.access_token:
-            if post_args is not None:
-                post_args["access_token"] = self.access_token
-            else:
-                args["access_token"] = self.access_token
+        #if self.access_token:
+        #    if post_args is not None:
+        #        post_args["access_token"] = self.access_token
+        #    else:
+        #        args["access_token"] = self.access_token
                 
         post_data = None if post_args is None else urllib.urlencode(post_args)
-        url = protocol + api_host + "/%s" + path + "?" + urllib.urlencode(args)
-        file = urllib2.urlopen(url, post_data)
+        url = protocol + "://" + api_host + "/%s" % version + "%s" % path
+        if args:
+            url += "?" + urllib.urlencode(args)
+
+        request = urllib2.Request(url,post_data)
+        request.add_header("X-Usercycle-API-Key",self.access_token)
+        request.add_header("Accept","application/json")
+
+        file = urllib2.urlopen(request)
         
         try:
             response = _parse_json(file.read())
