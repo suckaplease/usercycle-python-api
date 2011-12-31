@@ -16,7 +16,7 @@ except ImportError:
         from django.utils import simplejson
         _parse_json = lambda s: simplejson.loads(s)
 
-version = "8"
+version = "1"
 protocol = "http"
 api_host = "api.usercycle.com"
 
@@ -129,10 +129,11 @@ class UsercycleAPI(object):
         #        args["access_token"] = self.access_token
                 
         post_data = None if post_args is None else urllib.urlencode(post_args)
-        url = protocol + "://" + api_host + "/%s" % version + "%s" % path
+        url = protocol + "://" + api_host + "/api/v%s" % version + "%s" % path
         if args:
             url += "?" + urllib.urlencode(args)
-
+        
+        print "URL:  %s" % url
         request = urllib2.Request(url,post_data)
         request.add_header("X-Usercycle-API-Key",self.access_token)
         request.add_header("Accept","application/json")
