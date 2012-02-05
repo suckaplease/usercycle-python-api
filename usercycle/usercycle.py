@@ -133,7 +133,7 @@ class UsercycleAPI(object):
         if args:
             url += "?" + urllib.urlencode(args)
         
-        print "URL:  %s" % url
+        #print "URL:  %s" % url
         request = urllib2.Request(url,post_data)
         request.add_header("X-Usercycle-API-Key",self.access_token)
         request.add_header("Accept","application/json")
