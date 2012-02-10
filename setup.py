@@ -33,5 +33,5 @@ setup(name='usercycle',
        author_email='afouty@gmail.com',
        url='http://github.com/suckaplease/usercycle-python-api',
        packages=['usercycle',],
-       install_requires=[json_pkg,]
+       install_requires=[json_pkg,"requests",]
     )

@@ -1,7 +1,7 @@
 
-import urllib
-import urllib2
-import httplib
+#import urllib
+#import urllib2
+import requests
 
 # Find a JSON parser
 try:
@@ -126,32 +126,57 @@ class UsercycleAPI(object):
         if reason: kwargs['reason'] = reason
         self.request("/events.json", post_args=kwargs)
 
-
     def request(self, path, args=None, post_args=None):
         if not args: args = {}
-        #if self.access_token:
-        #    if post_args is not None:
-        #        post_args["access_token"] = self.access_token
-        #    else:
-        #        args["access_token"] = self.access_token
-                
-        post_data = None if post_args is None else urllib.urlencode(post_args)
-        url = protocol + "://" + api_host + "/api/v%s" % version + "%s" % path
-        if args:
-            args = args.encode('utf-8')
-            url += "?" + urllib.urlencode(args)
+        if self.access_token:
+            if post_args is not None:
+                post_args['access_token'] = self.access_token
+            else:
+                args['access_token'] = self.access_token
         
-        #print "URL:  %s" % url
-        request = urllib2.Request(url,post_data)
-        request.add_header("X-Usercycle-API-Key",self.access_token)
-        request.add_header("Accept","application/json")
-
-        file = urllib2.urlopen(request)
+        url = protocol + "://" + api_host + "/api/v%s" % version + "%s" % path
+        headers = {
+            "X-Usercycle-API-Key":self.access_token,
+            "Accept":"application/json",
+            }
         
         try:
-            response = _parse_json(file.read())
-        except urllib2.HTTPError, e:
+            if post_args:
+                #POST
+                r = requets.post(url, data=post_args, headers=headers)
+            else:
+                #GET
+                r = requests.get(url,params=args)
+            response = _parse_json(r.text)
+            return response
+        except requests.HTTPError, e:
             raise UsercycleError(e)
-        finally:
-            file.close()
-        return response
+
+
+    #def request(self, path, args=None, post_args=None):
+    #    if not args: args = {}
+    #    #if self.access_token:
+    #    #    if post_args is not None:
+    #    #        post_args["access_token"] = self.access_token
+    #    #    else:
+    #    #        args["access_token"] = self.access_token
+    #            
+    #    post_data = None if post_args is None else urllib.urlencode(post_args)
+    #    url = protocol + "://" + api_host + "/api/v%s" % version + "%s" % path
+    #    if args:
+    #        url += "?" + urllib.urlencode(args)
+    #    
+    #    #print "URL:  %s" % url
+    #    request = urllib2.Request(url,post_data)
+    #    request.add_header("X-Usercycle-API-Key",self.access_token)
+    #    request.add_header("Accept","application/json")
+    #
+    #    file = urllib2.urlopen(request)
+    #    
+    #    try:
+    #        response = _parse_json(file.read())
+    #    except urllib2.HTTPError, e:
+    #        raise UsercycleError(e)
+    #    finally:
+    #        file.close()
+    #    return response
