@@ -97,7 +97,8 @@ class UsercycleAPI(object):
         self.request("/events.json",post_args=kwargs)
     
     def activated(self, identity, **kwargs):
-        kwargs['action'] = 'ACTIVATED'    
+        kwargs['action'] = 'ACTIVATED'
+        kwargs['identity'] = identity
         self.request("/events.json",post_args=kwargs)
     
     def came_back(self, identity, **kwargs):
@@ -113,11 +114,17 @@ class UsercycleAPI(object):
         if revenue_amount: kwargs['revenue_amount'] = revenue_amount
         
         self.request("/events.json", post_args=kwargs)
+
+    def referred(self, identity, **kwargs):
+        kwargs['action'] = 'referred'
+        kwargs['identity'] = identity
+        self.request("/events.json", post_args=kwargs)
     
     def canceled(self, identity, reason=None, **kwargs):
         kwargs['action'] = 'CANCELED'
         kwargs['identity'] = identity
         if reason: kwargs['reason'] = reason
+        self.request("/events.json", post_args=kwargs)
 
 
     def request(self, path, args=None, post_args=None):
@@ -131,6 +138,7 @@ class UsercycleAPI(object):
         post_data = None if post_args is None else urllib.urlencode(post_args)
         url = protocol + "://" + api_host + "/api/v%s" % version + "%s" % path
         if args:
+            args = args.encode('utf-8')
             url += "?" + urllib.urlencode(args)
         
         #print "URL:  %s" % url
