@@ -143,7 +143,7 @@ class UsercycleAPI(object):
         try:
             if post_args:
                 #POST
-                r = requets.post(url, data=post_args, headers=headers)
+                r = requests.post(url, data=post_args, headers=headers)
             else:
                 #GET
                 r = requests.get(url,params=args)
