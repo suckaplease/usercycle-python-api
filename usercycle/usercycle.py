@@ -94,18 +94,18 @@ class UsercycleAPI(object):
         if campaign_source: kwargs['campaign_source'] = campaign_source
         if search_terms: kwargs['search_terms'] = search_terms
                 
-        self.request("/events.json",post_args=kwargs)
+        return self.request("/events.json",post_args=kwargs)
     
     def activated(self, identity, **kwargs):
         kwargs['action'] = 'ACTIVATED'
         kwargs['identity'] = identity
-        self.request("/events.json",post_args=kwargs)
+        return self.request("/events.json",post_args=kwargs)
     
     def came_back(self, identity, **kwargs):
         kwargs['action'] = 'CAME_BACK'
         kwargs['identity'] = identity
         
-        self.request("/events.json", post_args=kwargs)
+        return self.request("/events.json", post_args=kwargs)
     
     def purchased(self, identity, revenue_amount=None, **kwargs):
         kwargs['action'] = 'PURCHASED'
@@ -113,7 +113,7 @@ class UsercycleAPI(object):
         
         if revenue_amount: kwargs['revenue_amount'] = revenue_amount
         
-        self.request("/events.json", post_args=kwargs)
+        return self.request("/events.json", post_args=kwargs)
 
     def referred(self, identity, **kwargs):
         kwargs['action'] = 'referred'
@@ -130,9 +130,17 @@ class UsercycleAPI(object):
         if not args: args = {}
         if self.access_token:
             if post_args is not None:
-                post_args['access_token'] = self.access_token
+                identity = post_args.pop('identity')
+                action = post_args.pop('action')
+                properties = post_args
+                post_args = {'identity':identity,
+                             'action':action,
+                             'properties':properties,}
+                #post_args['access_token'] = self.access_token
+                
             else:
-                args['access_token'] = self.access_token
+                pass
+                #args['access_token'] = self.access_token
         
         url = protocol + "://" + api_host + "/api/v%s" % version + "%s" % path
         headers = {
