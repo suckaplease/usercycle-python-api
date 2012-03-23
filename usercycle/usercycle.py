@@ -1,4 +1,3 @@
-
 #import urllib
 #import urllib2
 import requests
@@ -78,8 +77,7 @@ class UsercycleAPI(object):
                campaign_source=None,
                search_terms=None,
                **kwargs):
-        kwargs['action'] = "SIGNED_UP"
-        kwargs['identity'] = identity
+        action = "signed_up"
         
         if first_name: kwargs['firstname'] = first_name
         if last_name: kwargs['lastname'] = last_name
@@ -94,71 +92,54 @@ class UsercycleAPI(object):
         if campaign_source: kwargs['campaign_source'] = campaign_source
         if search_terms: kwargs['search_terms'] = search_terms
                 
-        return self.request("/events.json",post_args=kwargs)
+        return self.post_request("/events.json",identity, action, properties=kwargs)
     
     def activated(self, identity, **kwargs):
-        kwargs['action'] = 'ACTIVATED'
-        kwargs['identity'] = identity
-        return self.request("/events.json",post_args=kwargs)
+        action = 'activated'        
+        return self.post_request("/events.json",identity, action, properties=kwargs)
     
     def came_back(self, identity, **kwargs):
-        kwargs['action'] = 'CAME_BACK'
-        kwargs['identity'] = identity
-        
-        return self.request("/events.json", post_args=kwargs)
+        action= 'came_back'
+        return self.post_request("/events.json", identity, action, properties=kwargs)
     
     def purchased(self, identity, revenue_amount=None, **kwargs):
-        kwargs['action'] = 'PURCHASED'
-        kwargs['identity'] = identity
-        
+        action = 'purchased'        
         if revenue_amount: kwargs['revenue_amount'] = revenue_amount
         
-        return self.request("/events.json", post_args=kwargs)
+        return self.post_request("/events.json", identity, action, properties=kwargs)
 
     def referred(self, identity, **kwargs):
-        kwargs['action'] = 'referred'
-        kwargs['identity'] = identity
-        self.request("/events.json", post_args=kwargs)
+        action = 'referred'
+        return self.post_request("/events.json", identity, action, properties=kwargs)
     
     def canceled(self, identity, reason=None, **kwargs):
-        kwargs['action'] = 'CANCELED'
-        kwargs['identity'] = identity
+        action = 'canceled'
         if reason: kwargs['reason'] = reason
-        self.request("/events.json", post_args=kwargs)
+        return self.post_request("/events.json", identity, action, properties=kwargs)
 
-    def request(self, path, args=None, post_args=None):
-        if not args: args = {}
+    def post_request(self, path, identity, action, properties=None):
         if self.access_token:
-            if post_args is not None:
-                identity = post_args.pop('identity')
-                action = post_args.pop('action')
-                properties = post_args
-                post_args = {'identity':identity,
-                             'action':action,
-                             'properties':properties,}
-                #post_args['access_token'] = self.access_token
-                
-            else:
-                pass
-                #args['access_token'] = self.access_token
-        
-        url = protocol + "://" + api_host + "/api/v%s" % version + "%s" % path
-        headers = {
-            "X-Usercycle-API-Key":self.access_token,
-            "Accept":"application/json",
-            }
-        
-        try:
-            if post_args:
-                #POST
+            post_args = {
+                "identity":identity,
+                "action":action,
+                "properties":properties,
+            }        
+            
+            url = protocol + "://" + api_host + "/api/v%s" % version + "%s" % path
+            headers = {
+                "X-Usercycle-API-Key":self.access_token,
+                "Accept":"application/json",
+                }            
+            try:
                 r = requests.post(url, data=post_args, headers=headers)
-            else:
-                #GET
-                r = requests.get(url,params=args)
-            response = _parse_json(r.text)
-            return response
-        except requests.HTTPError, e:
-            raise UsercycleError(e)
+                r.raise_for_status()
+                response = _parse_json(r.text)
+                return response
+            except requests.HTTPError, e:
+                
+                raise UsercycleError(e)
+        else:
+            raise ValueError("missing access_token")
 
 
     #def request(self, path, args=None, post_args=None):
