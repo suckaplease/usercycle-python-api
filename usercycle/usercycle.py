@@ -129,8 +129,9 @@ class UsercycleAPI(object):
             post_args = {
                 "identity":identity,
                 "action_name":action_name,
-                "properties":properties,
             }
+            for k,v in properties.iteritems():
+                post_args[k] = v
             if occurred_at:
                 # VALID FORMAT AS OF 4/18/12
                 fmt = '%Y-%m-%d %H:%M:%S UTC'
@@ -138,7 +139,9 @@ class UsercycleAPI(object):
                 post_args['occurred_at'] = occurred_at
             
             url = protocol + "://" + api_host + "/api/v%s" % version + "%s" % path
-            if DEBUG: print url
+            if DEBUG:
+                print url
+                pprint( post_args )
             headers = {
                 "X-Usercycle-API-Key":self.access_token,
                 "Accept":"application/json",
