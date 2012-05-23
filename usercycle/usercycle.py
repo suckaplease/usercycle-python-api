@@ -85,18 +85,18 @@ class UsercycleAPI(object):
                **kwargs):
         action = "signed_up"
         
-        if first_name: kwargs['firstname'] = first_name
-        if last_name: kwargs['lastname'] = last_name
-        if title: kwargs['title'] = title
-        if company: kwargs['company'] = company
-        if email: kwargs['email'] = email
-        if phone: kwargs['phone'] = phone
-        if twitter: kwargs['twitter'] = twitter
-        if facebook: kwargs['facebook'] = facebook
-        if plan_name: kwargs['plan_name'] = plan_name
-        if referrer: kwargs['referrer'] = referrer
-        if campaign_source: kwargs['campaign_source'] = campaign_source
-        if search_terms: kwargs['search_terms'] = search_terms
+        if first_name: kwargs['properties[first_name]'] = first_name
+        if last_name: kwargs['properties[last_name]'] = last_name
+        if title: kwargs['properties[title]'] = title
+        if company: kwargs['properties[company]'] = company
+        if email: kwargs['properties[email]'] = email
+        if phone: kwargs['properties[phone]'] = phone
+        if twitter: kwargs['properties[twitter]'] = twitter
+        if facebook: kwargs['properties[facebook]'] = facebook
+        if plan_name: kwargs['properties[plan_name]'] = plan_name
+        if referrer: kwargs['properties[referrer]'] = referrer
+        if campaign_source: kwargs['properties[campaign_source]'] = campaign_source
+        if search_terms: kwargs['properties[search_terms]'] = search_terms
                 
         return self.post_request("/events.json",identity, action, occurred_at=occurred_at, properties=kwargs)
     
