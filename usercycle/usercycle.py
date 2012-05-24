@@ -2,7 +2,7 @@ import datetime
 import requests
 from pprint import pprint
 
-DEBUG = True
+DEBUG = False
 
 # Find a JSON parser
 try:
@@ -10,12 +10,12 @@ try:
     _parse_json = lambda s: json.loads(s)
 except ImportError:
     try:
-        import simplejson
-        _parse_json = lambda s: simplejson.loads(s)
+        import simplejson as json
+        _parse_json = lambda s: json.loads(s)
     except ImportError:
         # For Google AppEngine
-        from django.utils import simplejson
-        _parse_json = lambda s: simplejson.loads(s)
+        from django.utils import simplejson as json
+        _parse_json = lambda s: json.loads(s)
 
 version = "1"
 protocol = "http"
@@ -139,27 +139,23 @@ class UsercycleAPI(object):
                 post_args['occurred_at'] = occurred_at
             
             url = protocol + "://" + api_host + "/api/v%s" % version + "%s" % path
-            if DEBUG:
-                print url
-                pprint( post_args )
             headers = {
                 "X-Usercycle-API-Key":self.access_token,
                 "Accept":"application/json",
                 }            
-            try:
-                r = requests.post(url, data=post_args, headers=headers)
-                if DEBUG: 
-                    pprint(r.headers)
-                    pprint(post_args)
-                r.raise_for_status()
-                response = _parse_json(r.text)
-                return response
-            except requests.HTTPError, e:
-                if DEBUG: 
-                    print response 
-                    pprint(r.headers)
-                #raise UsercycleError(e)
-                raise UsercycleError(r.status_code, r.text)
+            if DEBUG:
+                print 'url=%s' % url
+                print 'post_args=%s' % post_args
+                print 'headers=%s' % headers
+                print 'requests.post(url, data=post_args, headers=headers)'
+            r = requests.post(url, data=post_args, headers=headers)
+            #r = requests.post(url, data=json.dumps(post_args), headers=headers)
+            response = _parse_json(r.text)
+            if DEBUG: 
+                print response 
+                pprint(r.headers)
+            r.raise_for_status()
+            return response
         else:
             raise ValueError("missing access_token")
 
